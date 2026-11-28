@@ -1375,7 +1375,7 @@ paths:
       - W5-BIL-03
       x-status: full
       x-maturity: pre-release
-      x-io-shared: 3
+      x-typed: REQ-BIL-103, REQ-BIL-104
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -1442,7 +1442,7 @@ paths:
       - W5-BIL-03
       x-status: full
       x-maturity: pre-release
-      x-io-shared: 3
+      x-typed: REQ-BIL-103, REQ-BIL-104
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
@@ -1454,6 +1454,8 @@ paths:
       - code: BIL-ERR-IBAN-INVALID
         status: 422
       - code: BIL-ERR-CHARSET
+        status: 422
+      - code: BIL-ERR-MANDATE-STATE
         status: 422
       - code: BIL-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
@@ -1508,7 +1510,7 @@ paths:
       - W5-BIL-03
       x-status: full
       x-maturity: pre-release
-      x-io-shared: 3
+      x-typed: REQ-BIL-103, REQ-BIL-104
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -1526,6 +1528,13 @@ paths:
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: partyId
+        in: query
+        required: true
+        description: Party whose instruments are listed
+        schema:
+          type: string
+          format: uuid
       - $ref: common.yaml#/components/parameters/Cursor
       - $ref: common.yaml#/components/parameters/Limit
       responses:
@@ -1838,7 +1847,7 @@ paths:
       - W5-BIL-03
       x-status: full
       x-maturity: pre-release
-      x-io-shared: 5
+      x-typed: REQ-BIL-106..REQ-BIL-108
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -1904,7 +1913,7 @@ paths:
       - W5-BIL-03
       x-status: full
       x-maturity: pre-release
-      x-io-shared: 5
+      x-typed: REQ-BIL-106..REQ-BIL-108
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -1970,7 +1979,7 @@ paths:
       - W5-BIL-03
       x-status: full
       x-maturity: pre-release
-      x-io-shared: 5
+      x-typed: REQ-BIL-106..REQ-BIL-108
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -2034,7 +2043,7 @@ paths:
       - W5-BIL-03
       x-status: full
       x-maturity: pre-release
-      x-io-shared: 5
+      x-typed: REQ-BIL-106..REQ-BIL-108
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -2098,7 +2107,7 @@ paths:
       - W5-BIL-03
       x-status: full
       x-maturity: pre-release
-      x-io-shared: 5
+      x-typed: REQ-BIL-106..REQ-BIL-108
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -7457,60 +7466,114 @@ components:
           description: 'PRD: "fiscal and delivery status"'
     PaymentInstrumentAddRequest:
       type: object
-      description: 'bil.PaymentInstrument.add request. PRD inputs: "IBAN and holder, or card token"'
+      description: 'Typed from REQ-BIL-103 (BO-BIL-06a). PRD inputs: "IBAN and holder, or card token". The IBAN is P2: stored
+        field-encrypted with a blind index, never returned, logged or published. A card token is not supported yet.'
       properties:
+        partyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: Payer party (PTY)
         iban:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "IBAN and holder"'
+          type: string
+          description: IBAN, electronic or print format; checked ISO 13616
         holder:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "IBAN and holder"'
+          type: string
+          maxLength: 140
+          description: Account holder name
         orCardToken:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "or card token"'
+          type: string
+          description: Card token (not supported yet; refused)
+      required:
+      - partyId
+      - holder
     PaymentInstrumentAddResponse:
       type: object
-      description: 'bil.PaymentInstrument.add result. PRD outputs: "instrument (masked), VoP result"'
+      description: 'bil.PaymentInstrument.add result'
       properties:
         instrument:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "instrument (masked)"'
+          $ref: '#/components/schemas/PaymentInstrumentView'
         vopResult:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "VoP result"'
+          type: string
+          description: Verification of payee outcome recorded when the instrument was added
+          enum:
+          - MATCH
+          - CLOSE_MATCH
+          - NO_MATCH
+          - NOT_AVAILABLE
+      required:
+      - instrument
+
+    PaymentInstrumentView:
+      type: object
+      description: A payer instrument as shown to staff; the IBAN appears masked only (REQ-BIL-345)
+      properties:
+        instrumentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        partyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        kind:
+          type: string
+          enum:
+          - BANK_ACCOUNT
+        maskedIban:
+          type: string
+          description: IBAN masked except the last four characters
+        holder:
+          type: string
+        status:
+          type: string
+          enum:
+          - ACTIVE
+          - REMOVED
+        createdAt:
+          type: string
+          format: date-time
+      required:
+      - instrumentId
+      - partyId
+      - kind
+      - maskedIban
+      - holder
+      - status
     PaymentInstrumentRemoveRequest:
       type: object
-      description: 'bil.PaymentInstrument.remove request. PRD inputs: "IBAN and holder, or card token"'
+      description: 'bil.PaymentInstrument.remove request (BO-BIL-06a). An instrument used by a draft or active mandate cannot be removed.'
       properties:
-        iban:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "IBAN and holder"'
-        holder:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "IBAN and holder"'
-        orCardToken:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "or card token"'
+        instrumentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      required:
+      - instrumentId
     PaymentInstrumentRemoveResponse:
       type: object
-      description: 'bil.PaymentInstrument.remove result. PRD outputs: "instrument (masked), VoP result"'
+      description: 'bil.PaymentInstrument.remove result'
       properties:
         instrument:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "instrument (masked)"'
+          $ref: '#/components/schemas/PaymentInstrumentView'
         vopResult:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "VoP result"'
+          type: string
+          description: Verification of payee outcome recorded when the instrument was added
+          enum:
+          - MATCH
+          - CLOSE_MATCH
+          - NO_MATCH
+          - NOT_AVAILABLE
+      required:
+      - instrument
     PaymentInstrumentListItem:
       type: object
-      description: 'bil.PaymentInstrument.list result. PRD outputs: "instrument (masked), VoP result"'
+      description: 'bil.PaymentInstrument.list item'
       properties:
         instrument:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "instrument (masked)"'
+          $ref: '#/components/schemas/PaymentInstrumentView'
         vopResult:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "VoP result"'
+          type: string
+          description: Verification of payee outcome recorded when the instrument was added
+          enum:
+          - MATCH
+          - CLOSE_MATCH
+          - NO_MATCH
+          - NOT_AVAILABLE
+      required:
+      - instrument
     PaymentInstrumentListPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -7743,91 +7806,159 @@ components:
       description: Page of bil.PayeeAccount.list results (cursor pagination, contract §3.5.5)
     MandateCreateRequest:
       type: object
-      description: 'bil.Mandate.create request. PRD inputs: "account, instrument, signature evidence"'
+      description: 'bil.Mandate.create request (BO-BIL-06a). Creates a DRAFT mandate with a generated unique reference; it collects nothing until signed.'
       properties:
-        account:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "account"'
-        instrument:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "instrument"'
-        signatureEvidence:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "signature evidence"'
+        billingAccountId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        instrumentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: An ACTIVE instrument of the account's payer
+      required:
+      - billingAccountId
+      - instrumentId
     MandateCreateResponse:
       type: object
-      description: 'bil.Mandate.create result. PRD outputs: "mandate"'
+      description: 'bil.Mandate.create result'
       properties:
         mandate:
+          $ref: '#/components/schemas/MandateView'
+      required:
+      - mandate
+
+    MandateView:
+      type: object
+      description: A SEPA mandate (REQ-BIL-106..REQ-BIL-108). The IBAN appears masked only.
+      properties:
+        mandateId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        billingAccountId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        payerPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        instrumentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: Absent for a migrated mandate (only its masked IBAN was carried)
+        mandateReference:
+          type: string
+          maxLength: 35
+          description: SEPA unique mandate reference (UMR)
+        scheme:
+          type: string
+          enum:
+          - SEPA_CORE
+        sequenceType:
+          type: string
+          enum:
+          - FRST
+          - RCUR
+          - OOFF
+          - FNAL
+        status:
+          type: string
+          enum:
+          - DRAFT
+          - ACTIVE
+          - CANCELLED
+        maskedIban:
+          type: string
+        signatureDate:
           $ref: ../events/common.schema.json#/$defs/LocalDate
-          description: 'PRD: "mandate"'
+        signatureEvidenceId:
+          type: string
+          description: Reference of the consent evidence captured at signing
+        amendmentCount:
+          type: integer
+        origin:
+          type: string
+          enum:
+          - NATIVE
+          - MIGRATION
+      required:
+      - mandateId
+      - billingAccountId
+      - payerPartyId
+      - mandateReference
+      - scheme
+      - sequenceType
+      - status
+      - amendmentCount
+      - origin
     MandateSignRequest:
       type: object
-      description: 'bil.Mandate.sign request. PRD inputs: "account, instrument, signature evidence"'
+      description: 'bil.Mandate.sign request (BO-BIL-06a). Needs a consent evidence id.'
       properties:
-        account:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "account"'
-        instrument:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "instrument"'
-        signatureEvidence:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "signature evidence"'
+        mandateId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        signatureEvidenceId:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Reference of the captured consent evidence (signature, e-mandate log or document id)
+        signatureDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+          description: Date the payer signed; defaults to today, never in the future
+      required:
+      - mandateId
+      - signatureEvidenceId
     MandateSignResponse:
       type: object
-      description: 'bil.Mandate.sign result. PRD outputs: "mandate"'
+      description: 'bil.Mandate.sign result'
       properties:
         mandate:
-          $ref: ../events/common.schema.json#/$defs/LocalDate
-          description: 'PRD: "mandate"'
+          $ref: '#/components/schemas/MandateView'
+      required:
+      - mandate
     MandateAmendRequest:
       type: object
-      description: 'bil.Mandate.amend request. PRD inputs: "account, instrument, signature evidence"'
+      description: 'bil.Mandate.amend request (BO-BIL-06a). Moves an ACTIVE mandate to another instrument of the same payer with fresh consent evidence; the sequence type returns to FRST.'
       properties:
-        account:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "account"'
-        instrument:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "instrument"'
-        signatureEvidence:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "signature evidence"'
+        mandateId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        instrumentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        signatureEvidenceId:
+          type: string
+          minLength: 1
+          maxLength: 100
+      required:
+      - mandateId
+      - instrumentId
+      - signatureEvidenceId
     MandateAmendResponse:
       type: object
-      description: 'bil.Mandate.amend result. PRD outputs: "mandate"'
+      description: 'bil.Mandate.amend result'
       properties:
         mandate:
-          $ref: ../events/common.schema.json#/$defs/LocalDate
-          description: 'PRD: "mandate"'
+          $ref: '#/components/schemas/MandateView'
+      required:
+      - mandate
     MandateCancelRequest:
       type: object
-      description: 'bil.Mandate.cancel request. PRD inputs: "account, instrument, signature evidence"'
+      description: 'bil.Mandate.cancel request (BO-BIL-06a). A DRAFT or ACTIVE mandate is cancelled; a cancelled mandate is final.'
       properties:
-        account:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "account"'
-        instrument:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "instrument"'
-        signatureEvidence:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "signature evidence"'
+        mandateId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        reason:
+          type: string
+          maxLength: 200
+      required:
+      - mandateId
     MandateCancelResponse:
       type: object
-      description: 'bil.Mandate.cancel result. PRD outputs: "mandate"'
+      description: 'bil.Mandate.cancel result'
       properties:
         mandate:
-          $ref: ../events/common.schema.json#/$defs/LocalDate
-          description: 'PRD: "mandate"'
+          $ref: '#/components/schemas/MandateView'
+      required:
+      - mandate
     MandateGetResponse:
       type: object
-      description: 'bil.Mandate.get result. PRD outputs: "mandate"'
+      description: 'bil.Mandate.get result'
       properties:
         mandate:
-          $ref: ../events/common.schema.json#/$defs/LocalDate
-          description: 'PRD: "mandate"'
+          $ref: '#/components/schemas/MandateView'
+      required:
+      - mandate
     PaymentTakeRequest:
       type: object
       description: 'Typed from REQ-BIL-004, REQ-BIL-126, REQ-BIL-127. PRD inputs: "account, amount, method". SL-BIL records money already received

@@ -61,6 +61,7 @@ public static class BillingModule
                 $"GRANT SELECT, INSERT ON {Schema}.receivable, {Schema}.receivable_allocation, {Schema}.allocation, {Schema}.credit_application, {Schema}.ledger_entry, {Schema}.ledger_line TO {appRole}",
                 $"GRANT SELECT, INSERT ON {Schema}.migration_receivable, {Schema}.migration_mandate TO {appRole}",
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.suspense_item TO {appRole}",
+                $"GRANT SELECT, INSERT, UPDATE ON {Schema}.payment_instrument, {Schema}.mandate TO {appRole}",
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.levy_payable TO {appRole}",
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.disbursement_batch, {Schema}.disbursement_batch_item TO {appRole}",
                 $"GRANT SELECT ON {Schema}.ledger_account, {Schema}.ledger_rule TO {appRole}",
@@ -136,6 +137,27 @@ public static class BillingModule
         services.AddScoped<IValidator<ChangePaymentPlan>, ChangePaymentPlanValidator>();
         services.AddCommandAuditor<ChangePaymentPlan, PaymentPlanChangeResponse, PaymentPlanAuditor<ChangePaymentPlan, PaymentPlanChangeResponse>>();
         services.AddCommand<ChangePaymentPlan, PaymentPlanChangeResponse, ChangePaymentPlanHandler>(CommandDescriptor.For("bil.PaymentPlan.change") with { SupportsDryRun = true });
+
+        // BO-BIL-06a: payer instruments (IBAN P2) and SEPA mandates.
+        services.AddScoped<MandateReader>();
+        services.AddScoped<IValidator<AddPaymentInstrument>, AddPaymentInstrumentValidator>();
+        services.AddCommandAuditor<AddPaymentInstrument, PaymentInstrumentAddResponse, MandateAuditor<AddPaymentInstrument, PaymentInstrumentAddResponse>>();
+        services.AddCommand<AddPaymentInstrument, PaymentInstrumentAddResponse, AddPaymentInstrumentHandler>(CommandDescriptor.For("bil.PaymentInstrument.add") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<RemovePaymentInstrument>, RemovePaymentInstrumentValidator>();
+        services.AddCommandAuditor<RemovePaymentInstrument, PaymentInstrumentRemoveResponse, MandateAuditor<RemovePaymentInstrument, PaymentInstrumentRemoveResponse>>();
+        services.AddCommand<RemovePaymentInstrument, PaymentInstrumentRemoveResponse, RemovePaymentInstrumentHandler>(CommandDescriptor.For("bil.PaymentInstrument.remove") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<CreateMandate>, CreateMandateValidator>();
+        services.AddCommandAuditor<CreateMandate, MandateCreateResponse, MandateAuditor<CreateMandate, MandateCreateResponse>>();
+        services.AddCommand<CreateMandate, MandateCreateResponse, CreateMandateHandler>(CommandDescriptor.For("bil.Mandate.create") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<SignMandate>, SignMandateValidator>();
+        services.AddCommandAuditor<SignMandate, MandateSignResponse, MandateAuditor<SignMandate, MandateSignResponse>>();
+        services.AddCommand<SignMandate, MandateSignResponse, SignMandateHandler>(CommandDescriptor.For("bil.Mandate.sign") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<AmendMandate>, AmendMandateValidator>();
+        services.AddCommandAuditor<AmendMandate, MandateAmendResponse, MandateAuditor<AmendMandate, MandateAmendResponse>>();
+        services.AddCommand<AmendMandate, MandateAmendResponse, AmendMandateHandler>(CommandDescriptor.For("bil.Mandate.amend") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<CancelMandate>, CancelMandateValidator>();
+        services.AddCommandAuditor<CancelMandate, MandateCancelResponse, MandateAuditor<CancelMandate, MandateCancelResponse>>();
+        services.AddCommand<CancelMandate, MandateCancelResponse, CancelMandateHandler>(CommandDescriptor.For("bil.Mandate.cancel") with { SupportsDryRun = true });
 
         // SL2-BIL-DISB: payee accounts (IBAN P2) and the disbursement service for CLM claim payments. Both commands are
         // idempotent on the caller's key; their results carry the masked IBAN only, never the IBAN (REQ-BIL-338).
@@ -285,6 +307,8 @@ public static class BillingModule
     [
         ErrorDefinition.For(ModuleCode.BIL, "NOT-ELIGIBLE", 422, "Δεν επιτρέπεται για αυτόν τον όρο", "Not eligible")
             .Describe("Το πρόγραμμα πληρωμής ή ο τρόπος πληρωμής δεν ισχύει για τον όρο, ή ο όρος έχει ήδη τιμολογηθεί.", "The plan or method does not apply to the term, or the term is already billed."),
+        ErrorDefinition.For(ModuleCode.BIL, "MANDATE-STATE", 422, "Η εντολή άμεσης χρέωσης δεν επιτρέπει την ενέργεια", "The mandate state does not allow this")
+            .Describe("Η εντολή ή το μέσο πληρωμής βρίσκεται σε κατάσταση που δεν επιτρέπει την ενέργεια (π.χ. υπογραφή μη προσχεδίου, ακυρωμένη εντολή, μέσο σε χρήση).", "The mandate or instrument is in a state that does not allow the action (for example signing a non-draft, a cancelled mandate, an instrument in use)."),
         ErrorDefinition.For(ModuleCode.BIL, "NOT-FOUND", 404, "Δεν βρέθηκε", "Not found")
             .Describe("Η εγγραφή δεν υπάρχει στη νομική σας οντότητα.", "The record does not exist in your legal entity."),
         ErrorDefinition.For(ModuleCode.BIL, "CURRENCY", 422, "Λάθος νόμισμα", "Wrong currency")

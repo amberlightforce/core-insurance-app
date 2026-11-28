@@ -2059,6 +2059,133 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Billing.Persistence.MandateRow", b =>
+                {
+                    b.Property<Guid>("MandateId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("mandate_id");
+
+                    b.Property<int>("AmendmentCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("amendment_count");
+
+                    b.Property<Guid>("BillingAccountId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("billing_account_id");
+
+                    b.Property<string>("CancelReason")
+                        .HasColumnType("text")
+                        .HasColumnName("cancel_reason");
+
+                    b.Property<DateTime?>("CancelledAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("cancelled_at");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTime?>("FirstUsedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("first_used_at");
+
+                    b.Property<string>("IbanMasked")
+                        .HasColumnType("text")
+                        .HasColumnName("iban_masked");
+
+                    b.Property<Guid?>("InstrumentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("instrument_id");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("MandateReference")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("mandate_reference");
+
+                    b.Property<string>("Origin")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("origin");
+
+                    b.Property<Guid>("PayerPartyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("payer_party_id");
+
+                    b.Property<int>("RecordVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("record_version");
+
+                    b.Property<string>("Scheme")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("scheme");
+
+                    b.Property<string>("SequenceType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("sequence_type");
+
+                    b.Property<DateOnly?>("SignatureDate")
+                        .HasColumnType("date")
+                        .HasColumnName("signature_date");
+
+                    b.Property<string>("SignatureEvidenceId")
+                        .HasColumnType("text")
+                        .HasColumnName("signature_evidence_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.HasKey("MandateId")
+                        .HasName("pk_mandate");
+
+                    b.HasIndex("BillingAccountId");
+
+                    b.HasIndex("InstrumentId");
+
+                    b.HasIndex("LegalEntityId", "BillingAccountId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_mandate_live_account")
+                        .HasFilter("origin = 'NATIVE' AND status IN ('DRAFT', 'ACTIVE')");
+
+                    b.HasIndex("LegalEntityId", "MandateReference")
+                        .IsUnique()
+                        .HasDatabaseName("ux_mandate_reference");
+
+                    b.HasIndex("LegalEntityId", "BillingAccountId", "Status")
+                        .HasDatabaseName("ix_mandate_account");
+
+                    b.ToTable("mandate", "bil", t =>
+                        {
+                            t.HasCheckConstraint("ck_mandate_origin", "origin IN ('NATIVE', 'MIGRATION')");
+
+                            t.HasCheckConstraint("ck_mandate_record_version", "record_version >= 1");
+
+                            t.HasCheckConstraint("ck_mandate_reference", "char_length(mandate_reference) BETWEEN 1 AND 35");
+
+                            t.HasCheckConstraint("ck_mandate_scheme", "scheme = 'SEPA_CORE'");
+
+                            t.HasCheckConstraint("ck_mandate_sequence", "sequence_type IN ('FRST', 'RCUR', 'OOFF', 'FNAL')");
+
+                            t.HasCheckConstraint("ck_mandate_signed", "status <> 'ACTIVE' OR (signature_date IS NOT NULL AND (origin = 'MIGRATION' OR signature_evidence_id IS NOT NULL))");
+
+                            t.HasCheckConstraint("ck_mandate_status", "status IN ('DRAFT', 'ACTIVE', 'CANCELLED')");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Billing.Persistence.PayeeAccountRow", b =>
                 {
                     b.Property<Guid>("PayeeAccountId")
@@ -2190,6 +2317,98 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                             t.HasCheckConstraint("ck_payee_account_verification", "verification_status IN ('UNVERIFIED', 'VOP_MATCHED', 'VOP_CLOSE_MATCH', 'VOP_NO_MATCH', 'VOP_NOT_AVAILABLE', 'CONFIRMED')");
 
                             t.HasCheckConstraint("ck_payee_account_vop", "vop_result IS NULL OR vop_result IN ('MATCH', 'CLOSE_MATCH', 'NO_MATCH', 'NOT_AVAILABLE')");
+                        });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Billing.Persistence.PaymentInstrumentRow", b =>
+                {
+                    b.Property<Guid>("InstrumentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("instrument_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("HolderName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("holder_name");
+
+                    b.Property<string>("IbanBlindIndex")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("iban_blind_index");
+
+                    b.Property<byte[]>("IbanEncrypted")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("iban_encrypted");
+
+                    b.Property<string>("IbanLast4")
+                        .IsRequired()
+                        .HasColumnType("char(4)")
+                        .HasColumnName("iban_last4");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("kind");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<Guid>("PartyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("party_id");
+
+                    b.Property<int>("RecordVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("record_version");
+
+                    b.Property<DateTime?>("RemovedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("removed_at");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<string>("VopResult")
+                        .HasColumnType("text")
+                        .HasColumnName("vop_result");
+
+                    b.HasKey("InstrumentId")
+                        .HasName("pk_payment_instrument");
+
+                    b.HasIndex("LegalEntityId", "PartyId")
+                        .HasDatabaseName("ix_payment_instrument_party");
+
+                    b.HasIndex("LegalEntityId", "PartyId", "IbanBlindIndex")
+                        .IsUnique()
+                        .HasDatabaseName("ux_payment_instrument_active")
+                        .HasFilter("status = 'ACTIVE'");
+
+                    b.ToTable("payment_instrument", "bil", t =>
+                        {
+                            t.HasCheckConstraint("ck_payment_instrument_kind", "kind = 'BANK_ACCOUNT'");
+
+                            t.HasCheckConstraint("ck_payment_instrument_last4", "iban_last4 ~ '^[A-Z0-9]{4}$'");
+
+                            t.HasCheckConstraint("ck_payment_instrument_record_version", "record_version >= 1");
+
+                            t.HasCheckConstraint("ck_payment_instrument_status", "status IN ('ACTIVE', 'REMOVED')");
+
+                            t.HasCheckConstraint("ck_payment_instrument_vop", "vop_result IS NULL OR vop_result IN ('MATCH', 'CLOSE_MATCH', 'NO_MATCH', 'NOT_AVAILABLE')");
                         });
                 });
 
@@ -3249,6 +3468,22 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_levy_payable_disbursement");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Billing.Persistence.MandateRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Billing.Persistence.BillingAccountRow", null)
+                        .WithMany()
+                        .HasForeignKey("BillingAccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_mandate_account");
+
+                    b.HasOne("CoreIns.Modules.Billing.Persistence.PaymentInstrumentRow", null)
+                        .WithMany()
+                        .HasForeignKey("InstrumentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_mandate_instrument");
                 });
 
             modelBuilder.Entity("CoreIns.Modules.Billing.Persistence.PlanInstanceRow", b =>

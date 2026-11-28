@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text.Json;
+using CoreIns.Modules.Billing.Domain;
 using CoreIns.Modules.Billing.Persistence;
 using CoreIns.Modules.Billing.Services;
 using CoreIns.Modules.Migration.Contracts.Spi;
@@ -192,6 +193,16 @@ internal sealed class BillingMigrationImporter(
 
         // TODO(hardening): the IBAN itself (P2, field encryption) and the mandate scheme / sequence type; only the masked IBAN is carried.
         db.MigrationMandates.Add(row);
+
+        // BO-BIL-06a: the mandate also lives in bil.mandate under the same id (origin MIGRATION, ACTIVE, RCUR: it was collected under before),
+        // so reads and the direct-debit rules see migrated and native mandates alike. The reverser removes both rows.
+        db.Mandates.Add(new MandateRow
+        {
+            MandateId = row.MandateId, LegalEntityId = legalEntity, BillingAccountId = account, PayerPartyId = payload.PayerPartyId,
+            MandateReference = payload.MandateReference, SequenceType = Codes.Of(MandateSequence.Rcur), Status = Codes.Of(MandateStatus.Active),
+            IbanMasked = payload.IbanMasked, SignatureDate = new BusinessDate(payload.SignatureDate), Origin = "MIGRATION",
+            CreatedAt = clock.Now, CreatedBy = context.Actor.ToString(), RecordVersion = 1,
+        });
         return await SaveAsync(row.MandateId, $"Mandate {payload.MandateReference}.", payload.MandateReference, cancellationToken).ConfigureAwait(false);
     }
 
