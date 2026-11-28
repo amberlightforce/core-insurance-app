@@ -24,6 +24,123 @@ namespace CoreIns.Modules.Underwriting.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("CoreIns.Modules.Underwriting.Persistence.ContingencyRow", b =>
+                {
+                    b.Property<Guid>("ContingencyId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("contingency_id");
+
+                    b.Property<string>("BlockingPoint")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("blocking_point");
+
+                    b.Property<string>("ConsequenceCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("consequence_code");
+
+                    b.Property<string>("ConsequenceIssueType")
+                        .HasColumnType("text")
+                        .HasColumnName("consequence_issue_type");
+
+                    b.Property<string>("ContingencyType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("contingency_type");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("CustomerText")
+                        .HasColumnType("text")
+                        .HasColumnName("customer_text");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<DateOnly>("DueDate")
+                        .HasColumnType("date")
+                        .HasColumnName("due_date");
+
+                    b.Property<string>("EvidenceRef")
+                        .HasColumnType("text")
+                        .HasColumnName("evidence_ref");
+
+                    b.Property<Guid?>("JobId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("job_id");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<DateTime?>("OverdueAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("overdue_at");
+
+                    b.Property<string>("Owner")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("owner");
+
+                    b.Property<int>("RecordVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("record_version");
+
+                    b.Property<string>("ResolutionNote")
+                        .HasColumnType("text")
+                        .HasColumnName("resolution_note");
+
+                    b.Property<DateTime?>("ResolvedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("resolved_at");
+
+                    b.Property<string>("ResolvedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("resolved_by");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("TermId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("term_id");
+
+                    b.HasKey("ContingencyId")
+                        .HasName("pk_contingency");
+
+                    b.HasIndex("Status", "DueDate")
+                        .HasDatabaseName("ix_contingency_due");
+
+                    b.HasIndex("LegalEntityId", "JobId", "Status")
+                        .HasDatabaseName("ix_contingency_job");
+
+                    b.HasIndex("LegalEntityId", "TermId", "Status")
+                        .HasDatabaseName("ix_contingency_term");
+
+                    b.ToTable("contingency", "uw", t =>
+                        {
+                            t.HasCheckConstraint("ck_contingency_blocking_point", "blocking_point IN ('PRE_QUOTE', 'PRE_BIND', 'PRE_ISSUE', 'NON_BLOCKING')");
+
+                            t.HasCheckConstraint("ck_contingency_consequence", "consequence_code IN ('NONE', 'CANCEL_QUOTE', 'ADD_ISSUE')");
+
+                            t.HasCheckConstraint("ck_contingency_status", "status IN ('Open', 'Satisfied', 'Waived', 'ConsequenceApplied')");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Underwriting.Persistence.DeclineRow", b =>
                 {
                     b.Property<Guid>("DeclineId")

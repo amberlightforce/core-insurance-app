@@ -24,6 +24,14 @@
         "uw.Decline.decideReview": [ "Staff.UnderwritingManager", "Platform.Admin" ],
         "uw.RefusalRegister.query": [ "Staff.UnderwritingManager", "Platform.Admin" ],
         "uw.RefusalRegister.export": [ "Staff.UnderwritingManager", "Platform.Admin" ],
+        // BO-UW-08: contingencies. Waiving and applying a consequence are for managers.
+        "uw.Contingency.create": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Platform.Admin" ],
+        "uw.Contingency.list": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Platform.Admin" ],
+        "uw.Contingency.update": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Platform.Admin" ],
+        "uw.Contingency.satisfy": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Platform.Admin" ],
+        "uw.Contingency.extend": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Platform.Admin" ],
+        "uw.Contingency.waive": [ "Staff.UnderwritingManager", "Platform.Admin" ],
+        "uw.Contingency.applyConsequence": [ "Staff.UnderwritingManager", "Platform.Admin" ],
         "uw.Referral.list": [ "Staff.UnderwritingManager", "Platform.Admin" ],
         "uw.Referral.get": [ "Staff.UnderwritingManager", "Platform.Admin" ],
         // BO-UW-05: referral commands and the review lock. Deciding stays with uw.Issue.decide and the UW.ISSUE_APPROVAL authority.

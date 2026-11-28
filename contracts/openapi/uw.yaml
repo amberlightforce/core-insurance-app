@@ -5996,6 +5996,28 @@ components:
             - approvalStatus
             description: UW issue as returned by evaluate (REQ-UW-001)
           description: Blocking issues
+        contingencies:
+          type: array
+          items:
+            type: object
+            properties:
+              contingencyId:
+                $ref: ../events/common.schema.json#/$defs/Uuid
+              contingencyType:
+                $ref: ../events/common.schema.json#/$defs/Code
+              blockingPoint:
+                $ref: ../events/common.schema.json#/$defs/BlockingPoint
+              dueDate:
+                $ref: ../events/common.schema.json#/$defs/LocalDate
+              overdue:
+                type: boolean
+            required:
+            - contingencyId
+            - contingencyType
+            - blockingPoint
+            - dueDate
+            - overdue
+          description: Open contingencies of the job that block the point (REQ-UW-006)
       required:
       - blocked
       - issues
@@ -7284,8 +7306,54 @@ components:
           description: 'PRD: "file ref + manifest"'
     ContingencyCreateRequest:
       type: object
-      description: 'uw.Contingency.create request. PRD inputs: "per operation"'
-      x-status: minimal
+      description: 'uw.Contingency.create request (BO-UW-08): a condition on a policy term that must be met by its due date (REQ-UW-006). Default blocking point is PRE_ISSUE.'
+      properties:
+        termRef:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: Policy term the contingency belongs to
+        jobRef:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: Job whose blocking-status the contingency gates (optional)
+        contingencyType:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Contingency type code, e.g. PROOF_OF_NCB
+        description:
+          type: string
+          minLength: 1
+          maxLength: 1000
+          description: What must be done
+        customerText:
+          type: string
+          minLength: 1
+          maxLength: 1000
+          description: Text shown to the customer or producer (optional)
+        dueDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+          description: Date the contingency is due
+        owner:
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: Who has to act (a person or party reference)
+        blockingPoint:
+          $ref: ../events/common.schema.json#/$defs/BlockingPoint
+          description: Defaults to PRE_ISSUE; NON_BLOCKING does not gate the job
+        consequenceCode:
+          type: string
+          enum:
+          - NONE
+          - CANCEL_QUOTE
+          - ADD_ISSUE
+          description: What happens when it is overdue (default NONE)
+        consequenceIssueType:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Issue type raised by ADD_ISSUE
+      required:
+      - termRef
+      - contingencyType
+      - description
+      - dueDate
+      - owner
     ContingencyCreateResponse:
       type: object
       description: 'uw.Contingency.create result. PRD outputs: "contingency"'
@@ -7295,8 +7363,27 @@ components:
           description: 'PRD: "contingency"'
     ContingencyUpdateRequest:
       type: object
-      description: 'uw.Contingency.update request. PRD inputs: "per operation"'
-      x-status: minimal
+      description: 'uw.Contingency.update request (BO-UW-08): change the text or owner of an open contingency.'
+      properties:
+        description:
+          type: string
+          minLength: 1
+          maxLength: 1000
+          description: New description
+        customerText:
+          type: string
+          minLength: 1
+          maxLength: 1000
+          description: New customer text
+        owner:
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: New owner
+        recordVersion:
+          type: integer
+          minimum: 1
+          description: Version the caller read (optimistic concurrency)
     ContingencyUpdateResponse:
       type: object
       description: 'uw.Contingency.update result. PRD outputs: "contingency"'
@@ -7306,8 +7393,23 @@ components:
           description: 'PRD: "contingency"'
     ContingencySatisfyRequest:
       type: object
-      description: 'uw.Contingency.satisfy request. PRD inputs: "per operation"'
-      x-status: minimal
+      description: 'uw.Contingency.satisfy request (BO-UW-08): the evidence arrived.'
+      properties:
+        contingencyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: Contingency
+        evidenceRef:
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: Reference of the evidence (document, task)
+        note:
+          type: string
+          minLength: 1
+          maxLength: 1000
+          description: Note
+      required:
+      - contingencyId
     ContingencySatisfyResponse:
       type: object
       description: 'uw.Contingency.satisfy result. PRD outputs: "contingency"'
@@ -7317,8 +7419,19 @@ components:
           description: 'PRD: "contingency"'
     ContingencyWaiveRequest:
       type: object
-      description: 'uw.Contingency.waive request. PRD inputs: "per operation"'
-      x-status: minimal
+      description: 'uw.Contingency.waive request (BO-UW-08): an underwriter waives the contingency with a reason.'
+      properties:
+        contingencyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: Contingency
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 1000
+          description: Why it is waived (mandatory)
+      required:
+      - contingencyId
+      - reason
     ContingencyWaiveResponse:
       type: object
       description: 'uw.Contingency.waive result. PRD outputs: "contingency"'
@@ -7328,8 +7441,23 @@ components:
           description: 'PRD: "contingency"'
     ContingencyExtendRequest:
       type: object
-      description: 'uw.Contingency.extend request. PRD inputs: "per operation"'
-      x-status: minimal
+      description: 'uw.Contingency.extend request (BO-UW-08): move the due date later.'
+      properties:
+        contingencyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: Contingency
+        newDueDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+          description: New due date (after the current one)
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 1000
+          description: Why (mandatory)
+      required:
+      - contingencyId
+      - newDueDate
+      - reason
     ContingencyExtendResponse:
       type: object
       description: 'uw.Contingency.extend result. PRD outputs: "contingency"'
@@ -7339,8 +7467,13 @@ components:
           description: 'PRD: "contingency"'
     ContingencyApplyConsequenceRequest:
       type: object
-      description: 'uw.Contingency.applyConsequence request. PRD inputs: "per operation"'
-      x-status: minimal
+      description: 'uw.Contingency.applyConsequence request (BO-UW-08): apply the consequence of an overdue contingency.'
+      properties:
+        contingencyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: Contingency
+      required:
+      - contingencyId
     ContingencyApplyConsequenceResponse:
       type: object
       description: 'uw.Contingency.applyConsequence result. PRD outputs: "contingency"'
@@ -7350,11 +7483,57 @@ components:
           description: 'PRD: "contingency"'
     ContingencyListItem:
       type: object
-      description: 'uw.Contingency.list result. PRD outputs: "contingencies"'
+      description: 'uw.Contingency.list item (BO-UW-08)'
       properties:
-        contingencies:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "contingencies"'
+        id:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: Contingency
+        termRef:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: Policy term
+        jobRef:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: Job (optional)
+        contingencyType:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Type
+        description:
+          type: string
+          description: What must be done
+        customerText:
+          type: string
+          description: Customer text
+        dueDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+          description: Due date
+        owner:
+          type: string
+          description: Owner
+        blockingPoint:
+          $ref: ../events/common.schema.json#/$defs/BlockingPoint
+          description: Blocking point
+        status:
+          type: string
+          description: Open, Satisfied, Waived or ConsequenceApplied
+        overdue:
+          type: boolean
+          description: True when due and still Open
+        consequenceCode:
+          type: string
+          description: Consequence when overdue
+        recordVersion:
+          type: integer
+          description: Record version
+      required:
+      - id
+      - termRef
+      - contingencyType
+      - dueDate
+      - owner
+      - blockingPoint
+      - status
+      - overdue
+      - recordVersion
     ContingencyListPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope

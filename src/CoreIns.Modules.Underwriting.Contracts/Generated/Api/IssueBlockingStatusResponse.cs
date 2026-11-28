@@ -16,6 +16,11 @@ public sealed record IssueBlockingStatusResponse
     [global::System.Text.Json.Serialization.JsonPropertyName("issues")]
     public required global::System.Collections.Generic.IReadOnlyList<IssueItem> Issues { get; init; }
 
+    /// <summary>Open contingencies of the job that block the point (REQ-UW-006)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("contingencies")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Collections.Generic.IReadOnlyList<ContingencyItem>? Contingencies { get; init; }
+
     /// <summary>UW issue as returned by evaluate (REQ-UW-001)</summary>
     [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
     public sealed record IssueItem
@@ -54,5 +59,33 @@ public sealed record IssueBlockingStatusResponse
         /// <summary>Issue state (PRD-04 §7.3)</summary>
         [global::System.Text.Json.Serialization.JsonPropertyName("approvalStatus")]
         public required string ApprovalStatus { get; init; }
+    }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public sealed record ContingencyItem
+    {
+        /// <summary>Contract member 'contingencyId'.</summary>
+        /// <remarks>
+        /// <para>Untyped id: no SharedKernel id type is mapped for 'contingencyId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+        /// </remarks>
+        [global::System.Text.Json.Serialization.JsonPropertyName("contingencyId")]
+        public required global::System.Guid ContingencyId { get; init; }
+
+        /// <summary>Contract member 'contingencyType'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("contingencyType")]
+        public required string ContingencyType { get; init; }
+
+        /// <summary>Contract member 'blockingPoint'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("blockingPoint")]
+        public required global::CoreIns.Platform.Contracts.Common.BlockingPoint BlockingPoint { get; init; }
+
+        /// <summary>Contract member 'dueDate'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("dueDate")]
+        public required global::CoreIns.SharedKernel.BusinessDate DueDate { get; init; }
+
+        /// <summary>Contract member 'overdue'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("overdue")]
+        public required bool Overdue { get; init; }
     }
 }
