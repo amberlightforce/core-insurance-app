@@ -15,7 +15,7 @@ public interface IBillingMandateService
     /// <remarks>
     /// <para>Operation bil.Mandate.create (command; HTTP POST /api/bil/v1/mandates).</para>
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
-    /// <para>Status: full. Wave W5.</para>
+    /// <para>Status: full; fully typed from REQ-BIL-106..REQ-BIL-108. Wave W5.</para>
     /// <para>Exposure: ui; consumers: CHN.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; supports dry-run (options.DryRun).</para>
     /// <para>Errors: BIL-ERR-MANDATE-STATE (422), BIL-ERR-IDEMPOTENCY-MISMATCH (409).</para>
@@ -26,7 +26,7 @@ public interface IBillingMandateService
     /// <remarks>
     /// <para>Operation bil.Mandate.sign (command; HTTP POST /api/bil/v1/mandates/sign).</para>
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
-    /// <para>Status: full. Wave W5.</para>
+    /// <para>Status: full; fully typed from REQ-BIL-106..REQ-BIL-108. Wave W5.</para>
     /// <para>Exposure: ui; consumers: CHN.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; supports dry-run (options.DryRun).</para>
     /// <para>Errors: BIL-ERR-MANDATE-STATE (422), BIL-ERR-IDEMPOTENCY-MISMATCH (409).</para>

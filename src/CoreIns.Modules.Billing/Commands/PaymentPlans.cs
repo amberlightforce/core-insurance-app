@@ -25,8 +25,10 @@ internal sealed record ChangePaymentPlan(PaymentPlanChangeRequest Request) : ICo
 
 internal static class PaymentPlanRules
 {
-    /// <summary>Methods a term may be paid by (TODO(hardening): DIRECT_DEBIT needs an active mandate, BO-BIL-06a).</summary>
-    public static readonly string[] Methods = [ReceiptCodes.BankTransfer, ReceiptCodes.Cashier];
+    public const string DirectDebit = "DIRECT_DEBIT";
+
+    /// <summary>Methods a term may be paid by; DIRECT_DEBIT needs an ACTIVE SEPA mandate on the term's billing account (BO-BIL-06a).</summary>
+    public static readonly string[] Methods = [ReceiptCodes.BankTransfer, ReceiptCodes.Cashier, DirectDebit];
 
     public static void Common<T>(AbstractValidator<T> validator, Func<T, string> plan, Func<T, string> method, Func<T, int?> dueDay, Func<T, Guid?> term, Func<T, Guid?> job)
     {
@@ -65,6 +67,15 @@ internal static class PaymentPlanRules
         if (plan.CancelledEffective is not null)
         {
             return DomainError.Of(ModuleCode.BIL, "NOT-ELIGIBLE", "The term is cancelled; its plan can no longer change.");
+        }
+
+        if (string.Equals(method, DirectDebit, StringComparison.Ordinal))
+        {
+            var active = Codes.Of(MandateStatus.Active);
+            if (!await db.Mandates.AsNoTracking().AnyAsync(m => m.BillingAccountId == plan.BillingAccountId && m.LegalEntityId == legalEntity && m.Status == active, cancellationToken).ConfigureAwait(false))
+            {
+                return DomainError.Of(ModuleCode.BIL, "NOT-ELIGIBLE", "Direct debit needs an active signed mandate on the billing account.");
+            }
         }
 
         var currency = await db.Accounts.AsNoTracking().Where(a => a.BillingAccountId == plan.BillingAccountId).Select(a => a.Currency).SingleAsync(cancellationToken).ConfigureAwait(false);

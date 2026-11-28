@@ -4,15 +4,15 @@
 
 namespace CoreIns.Modules.Party.Contracts.Api;
 
-/// <summary>pty.Screening.bulk request. PRD inputs: "list"</summary>
+/// <summary>pty.Screening.bulk request (BO-PTY-07): screens up to 500 existing parties in one call; every hit opens a case.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ScreeningBulkRequest
 {
-    /// <summary>PRD: "list"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("list")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? List { get; init; }
+    /// <summary>Contract member 'partyIds'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("partyIds")]
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.SharedKernel.Identifiers.PartyId> PartyIds { get; init; }
+
+    /// <summary>Calling object (for example the migration batch)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("callerRef")]
+    public required global::CoreIns.SharedKernel.Identifiers.ObjectRef CallerRef { get; init; }
 }

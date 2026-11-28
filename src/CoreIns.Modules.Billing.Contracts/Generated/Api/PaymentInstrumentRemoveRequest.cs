@@ -4,31 +4,14 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>bil.PaymentInstrument.remove request. PRD inputs: "IBAN and holder, or card token"</summary>
+/// <summary>bil.PaymentInstrument.remove request (BO-BIL-06a). An instrument used by a draft or active mandate cannot be removed.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record PaymentInstrumentRemoveRequest
 {
-    /// <summary>PRD: "IBAN and holder"</summary>
+    /// <summary>Contract member 'instrumentId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'instrumentId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("iban")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Iban { get; init; }
-
-    /// <summary>PRD: "IBAN and holder"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("holder")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Holder { get; init; }
-
-    /// <summary>PRD: "or card token"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("orCardToken")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? OrCardToken { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("instrumentId")]
+    public required global::System.Guid InstrumentId { get; init; }
 }

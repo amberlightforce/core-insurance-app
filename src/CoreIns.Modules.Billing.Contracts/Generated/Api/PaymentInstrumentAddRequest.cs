@@ -4,31 +4,25 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>bil.PaymentInstrument.add request. PRD inputs: "IBAN and holder, or card token"</summary>
+/// <summary>Typed from REQ-BIL-103 (BO-BIL-06a). PRD inputs: "IBAN and holder, or card token". The IBAN is P2: stored field-encrypted with a blind index, never returned, logged or published. A card token is not supported yet.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record PaymentInstrumentAddRequest
 {
-    /// <summary>PRD: "IBAN and holder"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Payer party (PTY)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("partyId")]
+    public required global::CoreIns.SharedKernel.Identifiers.PartyId PartyId { get; init; }
+
+    /// <summary>IBAN, electronic or print format; checked ISO 13616</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("iban")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Iban { get; init; }
+    public string? Iban { get; init; }
 
-    /// <summary>PRD: "IBAN and holder"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Account holder name</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("holder")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Holder { get; init; }
+    public required string Holder { get; init; }
 
-    /// <summary>PRD: "or card token"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Card token (not supported yet; refused)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("orCardToken")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? OrCardToken { get; init; }
+    public string? OrCardToken { get; init; }
 }

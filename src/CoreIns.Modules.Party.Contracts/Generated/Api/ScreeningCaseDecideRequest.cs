@@ -4,15 +4,58 @@
 
 namespace CoreIns.Modules.Party.Contracts.Api;
 
-/// <summary>pty.Screening.caseDecide request. PRD inputs: "list"</summary>
+/// <summary>pty.Screening.caseDecide request (BO-PTY-07, maker-checker): PROPOSE a decision (needs decision), then a different person APPROVEs or REJECTs the proposal. The maker cannot approve (PLT-ERR-SELF-APPROVAL).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ScreeningCaseDecideRequest
 {
-    /// <summary>PRD: "list"</summary>
+    /// <summary>Contract member 'caseId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'caseId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("list")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? List { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("caseId")]
+    public required global::System.Guid CaseId { get; init; }
+
+    /// <summary>Contract member 'action'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("action")]
+    public required ActionValue Action { get; init; }
+
+    /// <summary>Required for PROPOSE</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("decision")]
+    public DecisionValue? Decision { get; init; }
+
+    /// <summary>Required for PROPOSE (the rationale) and REJECT</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("comment")]
+    public string? Comment { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<ActionValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum ActionValue
+    {
+        /// <summary><c>PROPOSE</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("PROPOSE")]
+        Propose,
+
+        /// <summary><c>APPROVE</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("APPROVE")]
+        Approve,
+
+        /// <summary><c>REJECT</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("REJECT")]
+        Reject,
+    }
+
+    /// <summary>Required for PROPOSE</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<DecisionValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum DecisionValue
+    {
+        /// <summary><c>CLEAR</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("CLEAR")]
+        Clear,
+
+        /// <summary><c>TRUE_MATCH</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("TRUE_MATCH")]
+        TrueMatch,
+    }
 }

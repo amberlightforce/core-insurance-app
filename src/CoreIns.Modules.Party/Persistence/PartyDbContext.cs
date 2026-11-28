@@ -58,6 +58,8 @@ internal sealed class PartyDbContext(DbContextOptions<PartyDbContext> options) :
 
     public DbSet<PartyMergeRow> PartyMerges => Set<PartyMergeRow>();
 
+    public DbSet<ScreeningCaseRow> ScreeningCases => Set<ScreeningCaseRow>();
+
     protected override string Schema => PartyModule.Schema;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -163,6 +165,45 @@ internal sealed class PartyDbContext(DbContextOptions<PartyDbContext> options) :
             entity.HasIndex(e => new { e.LegalEntityId, e.Status, e.RequestedAt }).HasDatabaseName("ix_party_merge_status");
             entity.HasOne<PartyRow>().WithMany().HasForeignKey(e => e.SurvivorPartyId).HasConstraintName("fk_party_merge_survivor").OnDelete(DeleteBehavior.Restrict);
             entity.HasOne<PartyRow>().WithMany().HasForeignKey(e => e.MergedPartyId).HasConstraintName("fk_party_merge_merged").OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<ScreeningCaseRow>(entity =>
+        {
+            entity.ToTable("screening_case", table =>
+            {
+                table.HasCheckConstraint("ck_screening_case_status", "status IN ('OPEN','PENDING_APPROVAL','CLEARED','TRUE_MATCH')");
+                table.HasCheckConstraint("ck_screening_case_proposed", "proposed_decision IS NULL OR proposed_decision IN ('CLEAR','TRUE_MATCH')");
+            });
+            entity.HasKey(e => e.CaseId).HasName("pk_screening_case");
+            entity.Property(e => e.CaseId).HasColumnName("case_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.CaseNumber).HasColumnName("case_number");
+            entity.Property(e => e.PartyId).HasColumnName("party_id");
+            entity.Property(e => e.SubjectKey).HasColumnName("subject_key");
+            entity.Property(e => e.SubjectName).HasColumnName("subject_name");
+            entity.Property(e => e.Country).HasColumnName("country");
+            entity.Property(e => e.Status).HasColumnName("status");
+            entity.Property(e => e.MatchFingerprint).HasColumnName("match_fingerprint");
+            entity.Property(e => e.Evidence).HasColumnName("evidence");
+            entity.Property(e => e.ListVersions).HasColumnName("list_versions");
+            entity.Property(e => e.CallerModule).HasColumnName("caller_module");
+            entity.Property(e => e.CallerType).HasColumnName("caller_type");
+            entity.Property(e => e.CallerId).HasColumnName("caller_id");
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+            entity.Property(e => e.ProposedDecision).HasColumnName("proposed_decision");
+            entity.Property(e => e.ProposedBy).HasColumnName("proposed_by");
+            entity.Property(e => e.ProposedAt).HasColumnName("proposed_at").HasColumnType("timestamptz");
+            entity.Property(e => e.ProposalComment).HasColumnName("proposal_comment");
+            entity.Property(e => e.ApprovalRequestId).HasColumnName("approval_request_id");
+            entity.Property(e => e.ContentHash).HasColumnName("content_hash");
+            entity.Property(e => e.DecidedBy).HasColumnName("decided_by");
+            entity.Property(e => e.DecidedAt).HasColumnName("decided_at").HasColumnType("timestamptz");
+            entity.Property(e => e.DecisionComment).HasColumnName("decision_comment");
+            entity.HasIndex(e => e.CaseNumber).IsUnique().HasDatabaseName("ux_screening_case_number");
+            entity.HasIndex(e => new { e.LegalEntityId, e.SubjectKey, e.CreatedAt }).HasDatabaseName("ix_screening_case_subject");
+            entity.HasIndex(e => new { e.LegalEntityId, e.Status, e.CreatedAt }).HasDatabaseName("ix_screening_case_status");
+            entity.HasOne<PartyRow>().WithMany().HasForeignKey(e => e.PartyId).HasConstraintName("fk_screening_case_party").OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<ProducerOfRecordRow>(entity =>

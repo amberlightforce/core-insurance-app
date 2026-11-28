@@ -17,6 +17,12 @@
           "Staff.Billing",
           "Platform.Admin"
         ],
+        "mkt.StatutoryClockSet.list": ["Staff.Underwriter", "Staff.Billing", "Platform.Admin", "Platform.ReleaseManager", "Platform.DesignAuthority"],
+        "mkt.StatutoryClockSet.get": ["Staff.Underwriter", "Staff.Billing", "Platform.Admin", "Platform.ReleaseManager", "Platform.DesignAuthority"],
+        "mkt.RegimeCode.list": ["Staff.Underwriter", "Staff.Billing", "Platform.Admin", "Platform.ReleaseManager", "Platform.DesignAuthority"],
+        "mkt.RegimeCode.get": ["Staff.Underwriter", "Staff.Billing", "Platform.Admin", "Platform.ReleaseManager", "Platform.DesignAuthority"],
+        "mkt.RegimeCode.validate": ["Staff.Underwriter", "Staff.Billing", "Platform.Admin", "Platform.ReleaseManager", "Platform.DesignAuthority"],
+        "mkt.RegimeCode.crosswalk": ["Staff.Underwriter", "Staff.Billing", "Platform.Admin", "Platform.ReleaseManager", "Platform.DesignAuthority"],
         "mkt.ConfigChangeRequest.create": ["Platform.ReleaseManager"],
         "mkt.ConfigChangeRequest.update": ["Platform.ReleaseManager"],
         "mkt.ConfigChangeRequest.submit": ["Platform.ReleaseManager"],

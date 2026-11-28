@@ -4,31 +4,25 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>bil.Mandate.amend request. PRD inputs: "account, instrument, signature evidence"</summary>
+/// <summary>bil.Mandate.amend request (BO-BIL-06a). Moves an ACTIVE mandate to another instrument of the same payer with fresh consent evidence; the sequence type returns to FRST.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record MandateAmendRequest
 {
-    /// <summary>PRD: "account"</summary>
+    /// <summary>Contract member 'mandateId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'mandateId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("account")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Account { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("mandateId")]
+    public required global::System.Guid MandateId { get; init; }
 
-    /// <summary>PRD: "instrument"</summary>
+    /// <summary>Contract member 'instrumentId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'instrumentId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("instrument")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Instrument { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("instrumentId")]
+    public required global::System.Guid InstrumentId { get; init; }
 
-    /// <summary>PRD: "signature evidence"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("signatureEvidence")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? SignatureEvidence { get; init; }
+    /// <summary>Contract member 'signatureEvidenceId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("signatureEvidenceId")]
+    public required string SignatureEvidenceId { get; init; }
 }
